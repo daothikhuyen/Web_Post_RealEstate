@@ -1,15 +1,12 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.UserCreationRequest;
+import com.example.backend.dto.request.User.UserCreationRequest;
 import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.dto.response.UserResponse;
-import com.example.backend.enity.User;
 import com.example.backend.reponsitory.UserRepository;
 import com.example.backend.service.UserService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}")
-    public ApiResponse<UserResponse> getUser(@PathVariable("userId") int userId){
+    public ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUser(userId))
                 .build();

@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.UserCreationRequest;
+import com.example.backend.dto.request.User.UserCreationRequest;
 import com.example.backend.dto.response.UserResponse;
 import com.example.backend.enums.ActivityType;
 import com.example.backend.enums.Role;
@@ -14,20 +14,15 @@ import com.example.backend.reponsitory.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor // lombok tạo các contructor
@@ -40,10 +35,6 @@ public class UserService {
     UserRepository userRespository;
     UserMapper userMapper;
 
-//    public UserService(ActivityLogEntityResponsitory activityLogEntityRepo) {
-//        this.activityLogEntityRepo = activityLogEntityRepo;
-//    }
-
     public UserResponse createUser(UserCreationRequest request){
 
         User user = userMapper.toUser(request);
@@ -52,6 +43,8 @@ public class UserService {
         user.setPassword(password);
         user.setUsername(user.getUsername());
         user.setEmail(user.getEmail());
+        user.setIs_activated("1");
+        user.setIsDeleted(0);
 
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
@@ -83,9 +76,8 @@ public class UserService {
     }
 
     // returnObject.email == authentication.name kiểm tra xem dữ liệu sau khi lâý có email trùng với email đang đăng nhập không
-    @PostAuthorize("returnObject.email == authentication.name")// kiểm tra method sau khi đã thực hiện xong
-    public UserResponse getUser(int id){
-        log.info("Vào method getUser theo id");
+    public UserResponse getUser(Long id){
+
         return userMapper.toUserResponse(userRespository.findById(id)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
@@ -94,15 +86,33 @@ public class UserService {
         try {
             var context = SecurityContextHolder.getContext();
             String email = context.getAuthentication().getName();
-            System.out.println(context.getAuthentication());
 
             User user = userRespository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
+            System.out.println(user.getPhone());
             return userMapper.toUserResponse(user);
         }catch (Exception e){
             throw  new UsernameNotFoundException(e.getMessage());
         }
     }
+
+
+    public String deleted_Account(){
+
+        try {
+            UserResponse userResponse = getMyInfo();
+            User user = userRespository.findByEmail(userResponse.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+            user.setIsDeleted(1);
+            userRespository.save(user);
+
+            return "Xoá tài khoản thành công";
+        }catch (Exception e){
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+
+    }
+
+
 
 
 }

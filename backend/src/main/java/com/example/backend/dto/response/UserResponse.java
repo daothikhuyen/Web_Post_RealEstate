@@ -9,9 +9,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class UserResponse {
-     private int id;
+     private Long id;
      private String username;
      private String password;
+     private String phone;
      private String email;
+     private String avatar;
      private Set<String> role;
 }

@@ -16,7 +16,7 @@
             </div>
             <div class="sidebarPost d-flex align-items-center mb-1" v-if="authUser">
                 <div class="avatar inline-block" style="padding: 0 .5rem;">
-                    <img v-if="authUser.avatar" :src="authUser.avatar" alt="avatar" class="image_avatar_user">
+                    <img v-if="authUser.avatar" :src="`http://localhost:8001${authUser.avatar}`" alt="avatar" class="image_avatar_user">
                     <img v-else class="image_avatar_user" src="../../assets/image/avatar/profile.jpg" alt="">
                 </div>
                 <div class="name d-block" >
@@ -45,7 +45,7 @@
         </div>
 
         <SidebarItem v-for="(item, index) in menuTree.user" :key="index" :data_children="item.children" :data="item" :depth="0" :smallMenu="smallMenu"/>
-        <div v-if="authUser && authUser.level == 1">
+        <div v-if="authUser && authUser.role[0] === 'ADMIN'">
              <SidebarItem v-for="(item, index) in menuTree.admin" :key="index" :data_children="item.children" :data="item" :depth="0" :smallMenu="smallMenu"/>
         </div>
         <SidebarItem v-for="(item, index) in menuTree.logout" :key="index" :data_children="item.children" :data="item" :depth="0" :smallMenu="smallMenu"/>
@@ -95,7 +95,7 @@ export default {
         }
     },
     created (){
-        this.user = this.$store.dispatch('getUser');
+        // this.user = this.$store.dispatch('getUser');
         this.menuTree = menuApi.Menus();
     }
 }

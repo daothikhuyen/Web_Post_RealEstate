@@ -1,5 +1,5 @@
 
-<template>
+<template>      
     <div class="menu-item" :class="{ opened: expanded }" v-if="data">
         <div v-if="data.title != 'Đăng xuất'">
             <router-link v-if="data.url !== ''"  :to="data.url" class="label" @click="toggleMenu()" :style="{ paddingLeft: depth * 20 + 20 + 'px' }" >

@@ -4,15 +4,133 @@
     <div class="HomeComponent">
         <navbar-component></navbar-component>
         <div class="view_home container-fluid mt-3" style="">
-            xin chào
+            <div class="row mx-auto">
+                <div class="col-lg-2 advertise">
+                    <div class="advertisement">
+                        <img class="" src="../assets/image/advertisement/advertisement_01.jpg" alt="">
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-12 col-sm-12 view_main mt-3 ">
+                    <form action="" @submit.prevent="searchInput" class="position-relative">
+                        <div class="parent_header_search">
+                            <div class="header_search">
+                                <div class="searchLocation" @click.prevent="getLocationByParent_id">
+                                    <div class="listsearch">
+                                        <i class="bi bi-geo-alt icon_location" ></i>
+                                        <div class="name_search">{{nameLocation!=null?nameLocation:'Toàn Quốc'}}</div>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                        <span class="postfix-div"></span>
+                                    </div>
+                                </div>
+                                <button type="submit" class="border-0 outline-none cursor-pointer" @click.prevent="searchInput">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <div class="LocationInputSearch">
+                                    <input type="text" class="input_search" v-model="inputSearch" @input="SearchSuggestions" placeholder="Nhập để tìm kiếm">
+                                </div>
+                                <button type="submit" class="btnSearch" @click.prevent="searchInput">Tìm Kiếm</button>
+                            </div>
+                        </div>
+                        <div class="listItemProps" :class="{'show': inputSearch != '' || inputSearch == null}">
+                            <div class="py-2">
+                                <ul class="ul_listItem px-0">
+                                    <div class="conntent_search">
+                                        Tìm kiếm từ khoá "{{inputSearch}}"
+                                    </div>
+                                    <li class="li_listItem" v-for="item in list_searchSeggestion.data" :key="item.id" @click.prevent="inputSearch = item.title; searchInput()">
+                                        <span>{{item.title}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="main_home py-md-3 mt-3">
+                        <div class="row">
+                            <div class="the_left col-md-4 float-md-start d-sm-block d-md-none">
+                                <div class="justify-content-between">
+                                    <div class="search-price w-100 me-1">
+                                        <div class="d-flex justify-content-between align-items-center" @click.prevent="dropdownBoxSearch('price')">
+                                            <h6>Lọc Theo Giá</h6>
+                                            <span >
+                                                <i class="fa-solid fa-chevron-up"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="search-acreage w-100 ms-1">
+                                        <div class="d-flex justify-content-between align-items-center" @click.prevent="dropdownBoxSearch('acreage')">
+                                            <h6>Lọc Theo Diện Tích</h6>
+                                            <span >
+                                                <i class="fa-solid fa-chevron-up"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8 postcomponet">
+                                <PostComponent :posts="posts"></PostComponent>
+                            </div>
+                            <div class="the_right col-md-4 float-md-start d-sm-none d-md-block">
+                                <div class="search-price w-100">
+                                    <h6>Lọc Theo Giá Thuê</h6>
+                                    <ul class="list-group list-group-search list-group-flush">
+                                        <li v-for="price in romePrice" :key="price.id" class="list-group-item list-group-item-action" @click.prevent="getBySearch('price',price.on,price.under)">
+                                            <a href="#" class="text-decoration-none">Giá từ {{price.title}}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="search-acreage w-100">
+                                    <h6>Lọc Theo Diện Tích</h6>
+                                    <ul  class="list-group list-group-search list-group-flush">
+                                        <li v-for="(item,index) in area" :key="index" class="list-group-item list-group-item-action" @click.prevent="getBySearch('area',item.on,item.under)">
+                                            <a href="#" v-if="index == 0" class="text-decoration-none">Dưới {{item.under}} m <sup>2</sup></a>
+                                            <a href="#" v-else class="text-decoration-none">Từ {{item.on}} - {{item.under}}m <sup>2</sup></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 advertise">
+                    <div class="advertisement">
+                        <img class="" src="../assets/image/advertisement/advertisement_01.jpg" alt="">
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+    <div>
+        <FilterLocationComponent
+            :show_BoxChooseLocation="show_BoxChooseLocation"
+            :black_screen="black_screen"
+            :openSearchPrice="openSearchPrice"
+            :openSearchArea="openSearchArea"
+            @off_filter_location="off_filter_location"
+            @searchPriceOrArea="getBySearch"
+            @Update_backScreen="UpdateBackScreen"
+            @title_location="titleLocation">
+        </FilterLocationComponent>
     </div>
 </template>
 
 <script>
-import { ref, defineComponent } from 'vue'
-import NavbarComponent from './NavbarComponent.vue'
+import Swal from 'sweetalert2'
+import debounce from 'lodash.debounce';
 
+import postApi from "../Api/postApi"
+import romePriceApi from "../Api/roomPrice"
+import areaApi from "../Api/area"
+
+import { ref, defineComponent, onMounted } from 'vue'
+import { useDateFormat, useNow } from '@vueuse/core'
+import NavbarComponent from './NavbarComponent.vue'
+import FilterLocationComponent from './Search_Location/SearchLocationComponent.vue';
+
+import PostComponent from './post/index.vue'
+import locationApi from '../Api/locationApi'
 import axios from 'axios'
 
 export default defineComponent(
@@ -20,7 +138,150 @@ export default defineComponent(
         name: "HomeComponent",
         components: {
             NavbarComponent,
+            PostComponent,
+            FilterLocationComponent
         },
+        props: {
+
+        },
+        data() {
+            const inputSearch = ref('')
+            const show_BoxChooseLocation = ref(null)
+            const roomPrice = ref([])
+            const posts = ref([])
+            const notification_bar = ref(true)
+            const black_screen = ref(true)
+            const list_searchSeggestion = ref([])
+            const showLocaing_location = ref(true)
+
+            const openSearchPrice = ref(false)
+            const openSearchArea = ref(false)
+
+            return {
+                posts,
+                notification_bar,
+                inputSearch,
+                roomPrice,
+                show_BoxChooseLocation,
+                black_screen,
+                list_searchSeggestion,
+                showLocaing_location,
+                openSearchPrice,
+                openSearchArea
+            }
+        },
+        methods: {
+
+            checkUser(){
+                axios.post('checkSession')
+            },
+
+            filterFeedBackData(post_id) {
+                return this.treeFeedback.feedback.filter(item => item.post_id === post_id)
+            },
+
+// tìm kiếm theo giá hoặc diện tích
+            getBySearch: debounce(async function(name,on,under){
+                const data = {
+                    name: name,
+                    on: on,
+                    under: under
+                }
+                const response = await postApi.searchPriceOrArea(data);
+
+                this.black_screen = true
+                this.openSearchPrice = false
+                this.openSearchArea = false
+
+                if(response.code == 1000 && response.result.length > 0){
+                    this.posts = response
+
+                }else{
+                    Swal.fire({
+                    title: "Thông Báo!",
+                    text: "Không Tìm Thấy Bài Đăng Phù Hợp",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1500
+                    })
+                }
+            },300),
+
+// Tìm kiếm theo ô nhập
+            searchInput: debounce( async function(){
+                console.log(this.inputSearch)
+                const data = {
+                    input : this.inputSearch
+                }
+
+                this.showLocaing_location = !this.showLocaing_location
+                const response =  await postApi.searchInputAll(data);
+
+                this.showLocaing_location = !this.showLocaing_location
+                if(response.code == 1000){
+                    
+                    this.inputSearch = ''
+                    this.posts = response
+                }else{
+                    Swal.fire({
+                    title: "Thông Báo!",
+                    text: "Không Tìm Thấy Bài Đăng Phù Hợp",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1500
+                    })
+                }
+            },500),
+
+// tìm kiếm theo đề xuất
+            SearchSuggestions: debounce(async function(){
+                const data = {
+                    input : this.inputSearch
+                }
+                if(this.inputSearch != ""){
+                    const response = await postApi.list_searchSuggestion(data);
+
+                    if(response.code  == 1000){
+                        this.list_searchSeggestion = response.result;
+                    }
+                }
+            },400),
+// tìm kiến theo id của quận huyện, thành phố
+            off_filter_location(posts){
+                this.posts = posts
+            },
+
+            async getLocationByParent_id(){
+                this.show_BoxChooseLocation = 'provinces'
+                this.black_screen = !this.black_screen
+            },
+
+            UpdateBackScreen(blaclScreen,show_Box){
+                this.black_screen = blaclScreen,
+                this.show_BoxChooseLocation = show_Box
+                this.openSearchPrice = false
+                this.openSearchArea = false
+            },
+
+            titleLocation(title){
+                this.nameLocation = title
+            },
+
+            dropdownBoxSearch(text){
+                if(text === "price"){
+                    this.openSearchPrice = !this.openSearchPrice
+                }else{
+                    this.openSearchArea = !this.openSearchArea
+                }
+                this.black_screen = !this.black_screen
+
+            }
+        },
+        created() {
+            // this.infoPost = postApi.listPost()
+            this.romePrice = romePriceApi.Price();
+            this.area = areaApi.Area();
+        }
     }
 )
 

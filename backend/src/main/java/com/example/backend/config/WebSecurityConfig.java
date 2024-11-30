@@ -26,9 +26,10 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity // phân quyền trên method ở thư mục controller
 public class WebSecurityConfig {
 
-    private final String [] PUBLIC_ENDPOINTS = {"/users/*","/log-in","/introspect", "/users/api", "/log-out"};
+    private final String [] PUBLIC_ENDPOINTS = {"/users/*","/log-in","/introspect", "/users/api", "/log-out","/refresh", "/storage/**","/api/posts/search/**", "/api/locations/**"};
+    private final String [] PUBLIC_ENDPOINTS_GET = {"/api/posts/getall", "/api/**","/storage/**"};
 
-//    @Value("${jwt.signerKey}")
+    //    @Value("${jwt.signerKey}")
 //    private String signerKey;
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
@@ -44,6 +45,7 @@ public class WebSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize ->
                         authorize.requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET,PUBLIC_ENDPOINTS_GET).permitAll()
 //                                        .requestMatchers(HttpMethod.GET,"/users/getUsers")
 //                                        .hasAuthority("SCOPE_ADMIN") // đường dẫn users chỉ chấp nhập cho role là admin truy cập vào
                                 .anyRequest().authenticated()) // với endpoint /customer/** sẽ yêu cầu authenticate

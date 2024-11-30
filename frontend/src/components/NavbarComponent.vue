@@ -56,14 +56,14 @@
                                 </a>
                             </button>
                         </li>
-                    </ul>
+                    </ul>                  
                     <div class="small_menu">
                         <ul :class="[isLoggedIn ? 'd-flex': 'd-none']">
                             <li class="me-4" v-if="authUser">
                                 <div class="userLogin w-100">
                                     <div class="avatar_name d-flex align-items-center dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <div class="avatar inline-block">
-                                            <img v-if="authUser.avatar" :src="authUser.avatar" alt="avatar" class="image_avatar_post">
+                                            <img v-if="authUser.avatar" :src="`http://localhost:8001${authUser.avatar}`" alt="avatar" class="image_avatar_post">
                                             <img v-else class="image_avatar_post" src="../assets/image/avatar/profile.jpg" alt="">
                                         </div>
                                         <div class="name ps-1 fw-semibold" >
@@ -74,7 +74,7 @@
                                         <li v-for="item in menu.user" :key="item.index" class="menu-child border-bottom py-1">
                                             <a class="dropdown-item" :href="item.url">{{item.title}}</a>
                                         </li>
-                                        <ul class="px-0" v-if="authUser.level == 1">
+                                        <ul class="px-0" v-if="authUser.role[0] === 'ADMIN'">
                                             <li v-for="item in menu.admin" :key="item.index" class="menu-child border-bottom py-1">
                                                 <a class="dropdown-item" :href="item.url">{{item.title}}</a>
                                             </li>
@@ -185,7 +185,7 @@ export default {
 
     },
     created() {
-       
+       this.user = this.$store.dispatch('getUser');
     },
 }
 
